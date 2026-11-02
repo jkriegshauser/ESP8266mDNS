@@ -411,7 +411,7 @@ namespace MDNSImplementation
         bool bResult = false;
 
         stcMDNSSendParameter sendParameter;
-        if (0 != ((sendParameter.m_pQuestions = new stcMDNS_RRQuestion)))
+        if (0 != ((sendParameter.m_pQuestions = new (std::nothrow) stcMDNS_RRQuestion)))
         {
             sendParameter.m_pQuestions->m_Header.m_Domain = p_QueryDomain;
 
@@ -505,32 +505,31 @@ namespace MDNSImplementation
             {
 #ifdef MDNS_IP4_SUPPORT
             case DNS_RRTYPE_A:
-                p_rpRRAnswer = new stcMDNS_RRAnswerA(header, u32TTL);
-                bResult      = _readRRAnswerA(*(stcMDNS_RRAnswerA*&)p_rpRRAnswer, u16RDLength);
+                p_rpRRAnswer = new (std::nothrow) stcMDNS_RRAnswerA(header, u32TTL);
+                bResult = ((p_rpRRAnswer) && (_readRRAnswerA(*(stcMDNS_RRAnswerA*&)p_rpRRAnswer, u16RDLength)));
                 break;
 #endif
             case DNS_RRTYPE_PTR:
-                p_rpRRAnswer = new stcMDNS_RRAnswerPTR(header, u32TTL);
-                bResult      = _readRRAnswerPTR(*(stcMDNS_RRAnswerPTR*&)p_rpRRAnswer, u16RDLength);
+                p_rpRRAnswer = new (std::nothrow) stcMDNS_RRAnswerPTR(header, u32TTL);
+                bResult = ((p_rpRRAnswer) && (_readRRAnswerPTR(*(stcMDNS_RRAnswerPTR*&)p_rpRRAnswer, u16RDLength)));
                 break;
             case DNS_RRTYPE_TXT:
-                p_rpRRAnswer = new stcMDNS_RRAnswerTXT(header, u32TTL);
-                bResult      = _readRRAnswerTXT(*(stcMDNS_RRAnswerTXT*&)p_rpRRAnswer, u16RDLength);
+                p_rpRRAnswer = new (std::nothrow) stcMDNS_RRAnswerTXT(header, u32TTL);
+                bResult = ((p_rpRRAnswer) && (_readRRAnswerTXT(*(stcMDNS_RRAnswerTXT*&)p_rpRRAnswer, u16RDLength)));
                 break;
 #ifdef MDNS_IP6_SUPPORT
             case DNS_RRTYPE_AAAA:
-                p_rpRRAnswer = new stcMDNS_RRAnswerAAAA(header, u32TTL);
-                bResult = _readRRAnswerAAAA(*(stcMDNS_RRAnswerAAAA*&)p_rpRRAnswer, u16RDLength);
+                p_rpRRAnswer = new (std::nothrow) stcMDNS_RRAnswerAAAA(header, u32TTL);
+                bResult = ((p_rpRRAnswer) && (_readRRAnswerAAAA(*(stcMDNS_RRAnswerAAAA*&)p_rpRRAnswer, u16RDLength)));
                 break;
 #endif
             case DNS_RRTYPE_SRV:
-                p_rpRRAnswer = new stcMDNS_RRAnswerSRV(header, u32TTL);
-                bResult      = _readRRAnswerSRV(*(stcMDNS_RRAnswerSRV*&)p_rpRRAnswer, u16RDLength);
+                p_rpRRAnswer = new (std::nothrow) stcMDNS_RRAnswerSRV(header, u32TTL);
+                bResult = ((p_rpRRAnswer) && (_readRRAnswerSRV(*(stcMDNS_RRAnswerSRV*&)p_rpRRAnswer, u16RDLength)));
                 break;
             default:
-                p_rpRRAnswer = new stcMDNS_RRAnswerGeneric(header, u32TTL);
-                bResult
-                    = _readRRAnswerGeneric(*(stcMDNS_RRAnswerGeneric*&)p_rpRRAnswer, u16RDLength);
+                p_rpRRAnswer = new (std::nothrow) stcMDNS_RRAnswerGeneric(header, u32TTL);
+                bResult = ((p_rpRRAnswer) && (_readRRAnswerGeneric(*(stcMDNS_RRAnswerGeneric*&)p_rpRRAnswer, u16RDLength)));
                 break;
             }
             DEBUG_EX_INFO(
@@ -559,7 +558,7 @@ namespace MDNSImplementation
                     {
                         size_t stTxtLength
                             = ((stcMDNS_RRAnswerTXT*&)p_rpRRAnswer)->m_Txts.c_strLength();
-                        char* pTxts = new char[stTxtLength];
+                        char* pTxts = new (std::nothrow) char[stTxtLength];
                         if (pTxts)
                         {
                             ((stcMDNS_RRAnswerTXT*&)p_rpRRAnswer)->m_Txts.c_str(pTxts);
@@ -642,7 +641,7 @@ namespace MDNSImplementation
         {
             bResult = false;
 
-            unsigned char* pucBuffer = new unsigned char[p_u16RDLength];
+            unsigned char* pucBuffer = new (std::nothrow) unsigned char[p_u16RDLength];
             if (pucBuffer)
             {
                 if (_udpReadBuffer(pucBuffer, p_u16RDLength))
@@ -675,7 +674,7 @@ namespace MDNSImplementation
                             {
                                 unsigned char ucValueLength
                                     = (ucLength - (pucEqualSign - pucCursor + 1));
-                                bResult = (((pTxt = new stcMDNSServiceTxt))
+                                bResult = (((pTxt = new (std::nothrow) stcMDNSServiceTxt))
                                            && (pTxt->setKey((const char*)pucCursor, ucKeyLength))
                                            && (pTxt->setValue((const char*)(pucEqualSign + 1),
                                                               ucValueLength)));
@@ -792,7 +791,7 @@ namespace MDNSImplementation
         p_rRRAnswerGeneric.clear();
         if (((p_rRRAnswerGeneric.m_u16RDLength = p_u16RDLength))
             && ((p_rRRAnswerGeneric.m_pu8RDData
-                 = new unsigned char[p_rRRAnswerGeneric.m_u16RDLength])))
+                 = new (std::nothrow) unsigned char[p_rRRAnswerGeneric.m_u16RDLength])))
         {
             bResult
                 = _udpReadBuffer(p_rRRAnswerGeneric.m_pu8RDData, p_rRRAnswerGeneric.m_u16RDLength);

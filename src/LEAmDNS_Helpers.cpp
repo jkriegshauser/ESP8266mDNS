@@ -77,7 +77,7 @@ namespace MDNSImplementation
                     sprintf(acIndexBuffer, "%lu", (++ulIndex));
                     size_t stLength     = ((pFoundDivider - p_rpcDomain + strlen(pcDivider))
                                        + strlen(acIndexBuffer) + 1);
-                    char*  pNewHostname = new char[stLength];
+                    char*  pNewHostname = new (std::nothrow) char[stLength];
                     if (pNewHostname)
                     {
                         memcpy(pNewHostname, p_rpcDomain,
@@ -107,7 +107,7 @@ namespace MDNSImplementation
             {
                 size_t stLength = strlen(p_rpcDomain)
                                   + (strlen(pcDivider) + 1 + 1);  // Name + Divider + '2' + '\0'
-                char* pNewHostname = new char[stLength];
+                char* pNewHostname = new (std::nothrow) char[stLength];
                 if (pNewHostname)
                 {
                     sprintf(pNewHostname, "%s%s2", p_rpcDomain, pcDivider);
@@ -130,7 +130,7 @@ namespace MDNSImplementation
             const char* cpcDefaultName = (p_pcDefaultDomain ?: "esp8266");
 
             size_t stLength = strlen(cpcDefaultName) + 1;  // '\0'
-            p_rpcDomain     = new char[stLength];
+            p_rpcDomain     = new (std::nothrow) char[stLength];
             if (p_rpcDomain)
             {
                 strncpy(p_rpcDomain, cpcDefaultName, stLength);
@@ -157,6 +157,15 @@ namespace MDNSImplementation
             DEBUG_OUTPUT.printf("[MDNSResponder] _callProcess (%lu, triggered by: %s)\n", millis(),
                                 IPAddress(m_pUDPContext->getRemoteAddress()).toString().c_str()););
 
+        // See MDNS_MIN_FREE_BLOCK: without a block of that size the message is dropped unread.
+        if (ESP.getMaxFreeBlockSize() < MDNS_MIN_FREE_BLOCK)
+        {
+            if ((m_pUDPContext) && (m_pUDPContext->next()))
+            {
+                m_pUDPContext->flush();
+            }
+            return false;
+        }
         return _process(false);
     }
 
@@ -177,7 +186,11 @@ namespace MDNSImplementation
         _releaseUDPContext();
         _joinMulticastGroups();
 
-        m_pUDPContext = new UdpContext;
+        m_pUDPContext = new (std::nothrow) UdpContext;
+        if (!m_pUDPContext)
+        {
+            return false;
+        }
         m_pUDPContext->ref();
 
         if (m_pUDPContext->listen(IP4_ADDR_ANY, DNS_MQUERY_PORT))
@@ -216,7 +229,7 @@ namespace MDNSImplementation
     */
     MDNSResponder::stcMDNSServiceQuery* MDNSResponder::_allocServiceQuery(void)
     {
-        stcMDNSServiceQuery* pServiceQuery = new stcMDNSServiceQuery;
+        stcMDNSServiceQuery* pServiceQuery = new (std::nothrow) stcMDNSServiceQuery;
         if (pServiceQuery)
         {
             // Link to query list
@@ -369,7 +382,7 @@ namespace MDNSImplementation
                 >= (stLength = strlen(p_pcHostname))))  // char max size for a single label
         {
             // Copy in hostname characters as lowercase
-            if ((bResult = (0 != (m_pcHostname = new char[stLength + 1]))))
+            if ((bResult = (0 != (m_pcHostname = new (std::nothrow) char[stLength + 1]))))
             {
 #ifdef MDNS_FORCE_LOWERCASE_HOSTNAME
                 size_t i = 0;
@@ -416,7 +429,7 @@ namespace MDNSImplementation
         if (((!p_pcName) || (MDNS_DOMAIN_LABEL_MAXLENGTH >= strlen(p_pcName))) && (p_pcService)
             && (MDNS_SERVICE_NAME_LENGTH >= strlen(p_pcService)) && (p_pcProtocol)
             && (MDNS_SERVICE_PROTOCOL_LENGTH >= strlen(p_pcProtocol)) && (p_u16Port)
-            && (0 != (pService = new stcMDNSService))
+            && (0 != (pService = new (std::nothrow) stcMDNSService))
             && (pService->setName(p_pcName ?: m_pcHostname)) && (pService->setService(p_pcService))
             && (pService->setProtocol(p_pcProtocol)))
         {
@@ -539,11 +552,11 @@ namespace MDNSImplementation
                                               (p_pcKey ? strlen(p_pcKey) : 0) + 1 +  // '='
                                               (p_pcValue ? strlen(p_pcValue) : 0))))
         {
-            pTxt = new stcMDNSServiceTxt;
+            pTxt = new (std::nothrow) stcMDNSServiceTxt;
             if (pTxt)
             {
                 size_t stLength = (p_pcKey ? strlen(p_pcKey) : 0);
-                pTxt->m_pcKey   = new char[stLength + 1];
+                pTxt->m_pcKey   = new (std::nothrow) char[stLength + 1];
                 if (pTxt->m_pcKey)
                 {
                     strncpy(pTxt->m_pcKey, p_pcKey, stLength);
@@ -553,7 +566,7 @@ namespace MDNSImplementation
                 if (p_pcValue)
                 {
                     stLength        = (p_pcValue ? strlen(p_pcValue) : 0);
-                    pTxt->m_pcValue = new char[stLength + 1];
+                    pTxt->m_pcValue = new (std::nothrow) char[stLength + 1];
                     if (pTxt->m_pcValue)
                     {
                         strncpy(pTxt->m_pcValue, p_pcValue, stLength);
@@ -741,7 +754,7 @@ namespace MDNSImplementation
         case DNS_RRTYPE_TXT:
         {
             size_t stTxtLength = ((const stcMDNS_RRAnswerTXT*)&p_RRAnswer)->m_Txts.c_strLength();
-            char*  pTxts       = new char[stTxtLength];
+            char*  pTxts       = new (std::nothrow) char[stTxtLength];
             if (pTxts)
             {
                 ((/*const c_str()!!*/ stcMDNS_RRAnswerTXT*)&p_RRAnswer)->m_Txts.c_str(pTxts);

@@ -113,7 +113,7 @@ namespace MDNSImplementation
         releaseKey();
         if (p_stLength)
         {
-            m_pcKey = new char[p_stLength + 1];
+            m_pcKey = new (std::nothrow) char[p_stLength + 1];
         }
         return m_pcKey;
     }
@@ -167,7 +167,7 @@ namespace MDNSImplementation
         releaseValue();
         if (p_stLength)
         {
-            m_pcValue = new char[p_stLength + 1];
+            m_pcValue = new (std::nothrow) char[p_stLength + 1];
         }
         return m_pcValue;
     }
@@ -300,7 +300,7 @@ namespace MDNSImplementation
             for (stcMDNSServiceTxt* pOtherTxt = p_Other.m_pTxts; pOtherTxt;
                  pOtherTxt                    = pOtherTxt->m_pNext)
             {
-                add(new stcMDNSServiceTxt(*pOtherTxt));
+                add(new (std::nothrow) stcMDNSServiceTxt(*pOtherTxt));
             }
         }
         return *this;
@@ -1242,7 +1242,7 @@ namespace MDNSImplementation
         size_t stLength = (p_pcName ? strlen(p_pcName) : 0);
         if (stLength)
         {
-            if ((bResult = (0 != (m_pcName = new char[stLength + 1]))))
+            if ((bResult = (0 != (m_pcName = new (std::nothrow) char[stLength + 1]))))
             {
                 strncpy(m_pcName, p_pcName, stLength);
                 m_pcName[stLength] = 0;
@@ -1279,7 +1279,7 @@ namespace MDNSImplementation
         size_t stLength = (p_pcService ? strlen(p_pcService) : 0);
         if (stLength)
         {
-            if ((bResult = (0 != (m_pcService = new char[stLength + 1]))))
+            if ((bResult = (0 != (m_pcService = new (std::nothrow) char[stLength + 1]))))
             {
                 strncpy(m_pcService, p_pcService, stLength);
                 m_pcService[stLength] = 0;
@@ -1316,7 +1316,7 @@ namespace MDNSImplementation
         size_t stLength = (p_pcProtocol ? strlen(p_pcProtocol) : 0);
         if (stLength)
         {
-            if ((bResult = (0 != (m_pcProtocol = new char[stLength + 1]))))
+            if ((bResult = (0 != (m_pcProtocol = new (std::nothrow) char[stLength + 1]))))
             {
                 strncpy(m_pcProtocol, p_pcProtocol, stLength);
                 m_pcProtocol[stLength] = 0;
@@ -1600,7 +1600,7 @@ namespace MDNSImplementation
         releaseServiceDomain();
         if (p_stLength)
         {
-            m_pcServiceDomain = new char[p_stLength];
+            m_pcServiceDomain = new (std::nothrow) char[p_stLength];
         }
         return m_pcServiceDomain;
     }
@@ -1629,7 +1629,7 @@ namespace MDNSImplementation
         releaseHostDomain();
         if (p_stLength)
         {
-            m_pcHostDomain = new char[p_stLength];
+            m_pcHostDomain = new (std::nothrow) char[p_stLength];
         }
         return m_pcHostDomain;
     }
@@ -1658,7 +1658,7 @@ namespace MDNSImplementation
         releaseTxts();
         if (p_stLength)
         {
-            m_pcTxts = new char[p_stLength];
+            m_pcTxts = new (std::nothrow) char[p_stLength];
         }
         return m_pcTxts;
     }
@@ -2265,7 +2265,7 @@ namespace MDNSImplementation
         stcDomainCacheItem* pNewItem = 0;
         if ((p_pHostnameOrService) && (p_u16Offset)
             && ((pNewItem
-                 = new stcDomainCacheItem(p_pHostnameOrService, p_bAdditionalData, p_u16Offset))))
+                 = new (std::nothrow) stcDomainCacheItem(p_pHostnameOrService, p_bAdditionalData, p_u16Offset))))
         {
             pNewItem->m_pNext = m_pDomainCacheItems;
             bResult           = ((m_pDomainCacheItems = pNewItem));

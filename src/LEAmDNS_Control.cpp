@@ -310,7 +310,7 @@ namespace MDNSImplementation
 
                             sendParameter.m_u16ID        = p_MsgHeader.m_u16ID;
                             sendParameter.m_bLegacyQuery = true;
-                            sendParameter.m_pQuestions   = new stcMDNS_RRQuestion;
+                            sendParameter.m_pQuestions   = new (std::nothrow) stcMDNS_RRQuestion;
                             if ((bResult = (0 != sendParameter.m_pQuestions)))
                             {
                                 sendParameter.m_pQuestions->m_Header.m_Domain
@@ -1013,7 +1013,7 @@ namespace MDNSImplementation
                     }
                     else if ((p_pPTRAnswer->m_u32TTL) &&  // Not just a goodbye-message
                              ((pSQAnswer
-                               = new stcMDNSServiceQuery::stcAnswer)))  // Not yet included -> add
+                               = new (std::nothrow) stcMDNSServiceQuery::stcAnswer)))  // Not yet included -> add
                                                                         // answer
                     {
                         pSQAnswer->m_ServiceDomain = p_pPTRAnswer->m_PTRDomain;
@@ -1233,7 +1233,7 @@ namespace MDNSImplementation
                         // 'Goodbye' note)
                         if (p_pAAnswer->m_u32TTL)  // NOT just a 'Goodbye' message
                         {
-                            pIP4Address = new stcMDNSServiceQuery::stcAnswer::stcIP4Address(
+                            pIP4Address = new (std::nothrow) stcMDNSServiceQuery::stcAnswer::stcIP4Address(
                                 p_pAAnswer->m_IPAddress, p_pAAnswer->m_u32TTL);
                             if ((pIP4Address) && (pSQAnswer->addIP4Address(pIP4Address)))
                             {
@@ -1322,7 +1322,7 @@ namespace MDNSImplementation
                         // 'Goodbye' note)
                         if (p_pAAAAAnswer->m_u32TTL)  // NOT just a 'Goodbye' message
                         {
-                            pIP6Address = new stcIP6Address(p_pAAAAAnswer->m_IPAddress,
+                            pIP6Address = new (std::nothrow) stcIP6Address(p_pAAAAAnswer->m_IPAddress,
                                                             p_pAAAAAnswer->m_u32TTL);
                             if ((pIP6Address) && (pSQAnswer->addIP6Address(pIP6Address)))
                             {
@@ -1604,7 +1604,7 @@ namespace MDNSImplementation
         stcMDNSSendParameter sendParameter;
         sendParameter.m_bCacheFlush = false;  // RFC 6762 10.2
 
-        sendParameter.m_pQuestions = new stcMDNS_RRQuestion;
+        sendParameter.m_pQuestions = new (std::nothrow) stcMDNS_RRQuestion;
         if (((bResult = (0 != sendParameter.m_pQuestions)))
             && ((bResult = _buildDomainForHost(m_pcHostname,
                                                sendParameter.m_pQuestions->m_Header.m_Domain))))
@@ -1664,7 +1664,7 @@ namespace MDNSImplementation
         stcMDNSSendParameter sendParameter;
         sendParameter.m_bCacheFlush = false;  // RFC 6762 10.2
 
-        sendParameter.m_pQuestions = new stcMDNS_RRQuestion;
+        sendParameter.m_pQuestions = new (std::nothrow) stcMDNS_RRQuestion;
         if (((bResult = (0 != sendParameter.m_pQuestions)))
             && ((bResult = _buildDomainForService(p_rService, true,
                                                   sendParameter.m_pQuestions->m_Header.m_Domain))))

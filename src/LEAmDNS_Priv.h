@@ -138,6 +138,17 @@ namespace MDNSImplementation
 #define MDNS_SERVICE_TTL 4500
 
 /*
+    MDNS_MIN_FREE_BLOCK
+
+    A received message is parsed with new, and the ESP8266 core is built without exceptions, so an
+    allocation that fails ends in a fatal reset. A message is only parsed while a heap block of this
+    size is free; otherwise it is dropped unread, and the sender repeats its query.
+*/
+#ifndef MDNS_MIN_FREE_BLOCK
+#define MDNS_MIN_FREE_BLOCK 2048
+#endif
+
+/*
     Compressed labels are flagged by the two topmost bits of the length byte being set
 */
 #define MDNS_DOMAIN_COMPRESS_MARK 0xC0
@@ -191,6 +202,7 @@ namespace MDNSImplementation
 }  // namespace esp8266
 
 // Include the main header, so the submodlues only need to include this header
+#include <new>
 #include "LEAmDNS.h"
 
 #endif  // MDNS_PRIV_H
