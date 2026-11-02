@@ -1,3 +1,22 @@
+ESPixelStick copy
+-----------------
+
+This is the ESP8266mDNS library as shipped in esp8266/Arduino core 3.1.2 (LEAmDNS, version 1.2), carried
+as a separate library so that it can be fixed ahead of the core. PlatformIO picks a ``lib_deps`` library over
+a framework library of the same name, so pinning this repository from ``platformio.ini`` replaces the
+core's copy in the build.
+
+Changes against the core (see the git history):
+
+- A received message is parsed only while a heap block of ``MDNS_MIN_FREE_BLOCK`` bytes (2048 unless
+  overridden) is free; otherwise it is dropped unread. The core's responder allocates every record with a
+  plain ``new`` and the ESP8266 build has no exceptions, so a message that arrives while the heap is short
+  resets the board.
+- The allocations of the responder use ``new (std::nothrow)`` where the result is checked, and the six
+  record readers in ``_readRRAnswer()`` check theirs.
+
+Everything else is unchanged, including the license of the original files.
+
 ESP8266 Multicast DNS
 =====================
 
